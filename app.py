@@ -1,41 +1,47 @@
-import json
+from flask import Flask, send_from_directory, request, jsonify
 import os
-from flask import Flask, render_template, request
+import json
 
-# template_folder='.' diyerek index.html dosyasını aynı klasörden okumasını sağlıyoruz
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__, static_url_path='', static_folder='.')
 
+DATA_FILE = os.path.join(os.path.dirname(__file__), 'veriler.json')
+
+DEFAULT_DATA = {
+    "kasa": 0,
+    "cariler": [],
+    "ortaklar": [
+        {"ad": "Ertan", "bakiye": 0, "sifre": "1234"},
+        {"ad": "Fikret", "bakiye": 0, "sifre": "1234"}
+    ],
+    "hareketler": []
+}
 
 @app.route('/')
-def home():
-  return render_template('index.html')
+def index():
+    return send_from_directory('.', 'index.html')
 
-
-@app.route('/kaydet', methods=['POST'])
-def kaydet():
-  ad = request.form.get('ad')
-  soyad = request.form.get('soyad')
-  telefon = request.form.get('telefon')
-  mesaj = request.form.get('mesaj')
-
-  yeni_veri = {'ad': ad, 'soyad': soyad, 'telefon': telefon, 'mesaj': mesaj}
-
-  veri_listesi = []
-  if os.path.exists('veriler.json'):
+@app.route('/api/veriler', methods=['GET'])
+def get_veriler():
+    if not os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(DEFAULT_DATA, f, ensure_ascii=False, indent=2)
     try:
-      with open('veriler.json', 'r', encoding='utf-8') as f:
-        veri_listesi = json.load(f)
-    except:
-      veri_listesi = []
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": "JSON okuma hatası", "details": str(e)}), 500
 
-  veri_listesi.append(yeni_veri)
-
-  with open('veriler.json', 'w', encoding='utf-8') as f:
-    json.dump(veri_listesi, f, ensure_ascii=False, indent=4)
-
-  return '<h1>Mesajınız Başarıyla Kaydedildi!</h1><a href="/">Geri Dön</a>'
-
+@app.route('/api/veriler', methods=['POST'])
+def save_veriler():
+    try:
+        req_data = request.get_json()
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(req_data, f, ensure_ascii=False, indent=2)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": "Dosyaya yazılamadı", "details": str(e)}), 500
 
 if __name__ == '__main__':
-  port = int(os.environ.get('PORT', 10000))
-  app.run(host='0.0.0.0', port=port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
