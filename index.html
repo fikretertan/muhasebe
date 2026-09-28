@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İletişim Formu ve Kayıtlar</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 700px;
+        }
+        .card {
+            background-color: #ffffff;
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 { margin-top: 0; color: #333; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .btn-group { display: flex; gap: 10px; }
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-submit { background-color: #007bff; }
+        .btn-submit:hover { background-color: #0056b3; }
+        .btn-toggle { background-color: #28a745; }
+        .btn-toggle:hover { background-color: #218838; }
+
+        /* Tablo Stilleri */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .gizli { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Form Kartı -->
+    <div class="card">
+        <h2>İletişim Formu</h2>
+        <form id="iletisimFormu">
+            <div class="form-group">
+                <label for="ad_soyad">Ad Soyad</label>
+                <input type="text" id="ad_soyad" required placeholder="Ahmet Yılmaz">
+            </div>
+            <div class="form-group">
+                <label for="telefon">Telefon Numarası</label>
+                <input type="tel" id="telefon" required placeholder="0555 123 45 67">
+            </div>
+            <div class="form-group">
+                <label for="email">E-posta Adresi</label>
+                <input type="email" id="email" required placeholder="ornek@email.com">
+            </div>
+            <div class="form-group">
+                <label for="aciklama">Açıklama</label>
+                <textarea id="aciklama" rows="3" required placeholder="Mesajınızı yazınız..."></textarea>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn-submit">Kaydet</button>
+                <button type="button" class="btn-toggle" onclick="kayitlariGosterGizle()">Kayıtları Göster / Gizle</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Kayıtları Listeleme Kartı -->
+    <div class="card gizli" id="kayitlarKarti">
+        <h2>Kayıtlı Veriler (JSON)</h2>
+        <table id="kayitlarTablosu">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Ad Soyad</th>
+                    <th>Telefon</th>
+                    <th>E-posta</th>
+                    <th>Açıklama</th>
+                </tr>
+            </thead>
+            <tbody id="tabloGövdesi">
+                <!-- Veriler buraya dinamik eklenecek -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Kayıtları tutacağımız JSON dizisi
+    let kayitlar = [];
+
+    const form = document.getElementById('iletisimFormu');
+    const kayitlarKarti = document.getElementById('kayitlarKarti');
+    const tabloGovdesi = document.getElementById('tabloGövdesi');
+
+    // Form gönderildiğinde veriyi ekle
+    form.addEventListener('submit', function(e) {
+        e.preventDefault(); // Sayfanın yenilenmesini engelle
+
+        // Yeni veriyi JSON objesi olarak oluştur
+        const yeniKayit = {
+            id: kayitlar.length + 1,
+            ad_soyad: document.getElementById('ad_soyad').value,
+            telefon: document.getElementById('telefon').value,
+            email: document.getElementById('email').value,
+            aciklama: document.getElementById('aciklama').value
+        };
+
+        // Listeye ekle
+        kayitlar.push(yeniKayit);
+
+        // Tabloyu güncelle ve formu temizle
+        tabloyuGuncelle();
+        form.reset();
+        alert("Veri başarıyla kaydedildi!");
+    });
+
+    // Tabloyu güncelleme fonksiyonu
+    function tabloyuGuncelle() {
+        tabloGovdesi.innerHTML = "";
+        kayitlar.forEach(k => {
+            const satir = `<tr>
+                <td>${k.id}</td>
+                <td>${k.ad_soyad}</td>
+                <td>${k.telefon}</td>
+                <td>${k.email}</td>
+                <td>${k.aciklama}</td>
+            </tr>`;
+            tabloGovdesi.innerHTML += satir;
+        });
+    }
+
+    // Kayıtları Göster/Gizle Butonu
+    function kayitlariGosterGizle() {
+        if (kayitlarKarti.classList.contains('gizli')) {
+            kayitlarKarti.classList.remove('gizli');
+        } else {
+            kayitlarKarti.classList.add('gizli');
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "ad_soyad": "Ahmet Yılmaz",
+    "telefon": "0555 123 45 67",
+    "email": "ahmet@gmail.com",
+    "aciklama": "Web sitesi hakkında bilgi almak istiyorum."
+  },
+  {
+    "id": 2,
+    "ad_soyad": "Ayşe Kaya",
+    "telefon": "0532 987 65 43",
+    "email": "ayse@hotmail.com",
+    "aciklama": "Fiyat teklifi talep ediyorum."
+  }
+]
